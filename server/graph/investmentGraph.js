@@ -15,7 +15,7 @@ async function researchNode(state) {
 }
 
 async function financeNode(state) {
-  const finance = await financeAgent(state.company);
+  const finance = await financeAgent(state);
 
   return {
     ...state,
@@ -24,7 +24,7 @@ async function financeNode(state) {
 }
 
 async function riskNode(state) {
-  const risk = await riskAgent(state.company);
+  const risk = await riskAgent(state);
 
   return {
     ...state,
@@ -33,10 +33,7 @@ async function riskNode(state) {
 }
 
 async function decisionNode(state) {
-  const decision = await decisionAgent(
-    state.financialScore,
-    state.riskScore
-  );
+  const decision = await decisionAgent(state);
 
   return {
     ...state,
@@ -47,18 +44,30 @@ async function decisionNode(state) {
 const graph = new StateGraph({
   channels: {
     company: {},
+    sources: {},
+    webContext: {},
     summary: {},
     industry: {},
+    businessModel: {},
     strengths: {},
+    watchItems: {},
     financialScore: {},
     revenueGrowth: {},
     profitability: {},
     debtLevel: {},
+    cashFlowQuality: {},
+    valuationView: {},
+    financialNotes: {},
     riskScore: {},
     risks: {},
+    riskSummary: {},
+    redFlags: {},
     recommendation: {},
     confidence: {},
     decisionReason: {},
+    bullCase: {},
+    bearCase: {},
+    nextResearchSteps: {},
   },
 });
 

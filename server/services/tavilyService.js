@@ -1,8 +1,11 @@
-const { TavilySearch } = require("@langchain/community/tools/tavily_search");
+require("dotenv").config({ quiet: true });
 
-const tavilyTool = new TavilySearch({
-  tavilyApiKey: process.env.TAVILY_API_KEY,
-  maxResults: 5,
-});
+const { tavily } = require("@tavily/core");
+
+const tavilyTool = process.env.TAVILY_API_KEY
+  ? tavily({
+      apiKey: process.env.TAVILY_API_KEY,
+    })
+  : null;
 
 module.exports = tavilyTool;

@@ -1,15 +1,61 @@
 const model = require("../services/llmService");
+const tavilyTool = require("../services/tavilyService");
+const parseJsonFromModel = require("../utils/json");
+
+async function getWebContext(company) {
+  if (!tavilyTool) {
+    return {
+      webContext: "Tavily key not configured. Use general market knowledge and mark live evidence as limited.",
+      sources: [],
+    };
+  }
+
+  try {
+    const searchResult = await tavilyTool.search(
+      `${company} company latest financial performance business risks investment analysis`,
+      {
+        maxResults: 5,
+        searchDepth: "advanced",
+      }
+    );
+
+    const raw = typeof searchResult === "string" ? searchResult : JSON.stringify(searchResult);
+
+    return {
+      webContext: raw.slice(0, 6000),
+      sources: Array.isArray(searchResult?.results)
+        ? searchResult.results.slice(0, 5).map((item) => ({
+            title: item.title,
+            url: item.url,
+          }))
+        : [],
+    };
+  } catch (error) {
+    console.error("Tavily search failed:", error.message);
+    return {
+      webContext: "Live search failed. Use general market knowledge and note evidence limitations.",
+      sources: [],
+    };
+  }
+}
 
 async function researchAgent(company) {
+  const { webContext, sources } = await getWebContext(company);
+
   const response = await model.invoke(`
-Analyze ${company}.
+You are an equity research analyst. Build a concise research brief for "${company}".
+
+Use this web/search context when available:
+${webContext}
 
 Return ONLY valid JSON:
 
 {
   "summary": "",
   "industry": "",
-  "strengths": ["","",""]
+  "businessModel": "",
+  "strengths": ["", "", ""],
+  "watchItems": ["", "", ""]
 }
 
 Do not add markdown.
@@ -17,23 +63,20 @@ Do not add explanation.
 Return only JSON.
 `);
 
-  try {
-    const parsedData = JSON.parse(response.content);
+  const parsedData = parseJsonFromModel(response.content, {
+    summary: response.content,
+    industry: "Unknown",
+    businessModel: "Unknown",
+    strengths: [],
+    watchItems: [],
+  });
 
-    return {
-      company,
-      ...parsedData
-    };
-  } catch (error) {
-    console.error("JSON Parse Error:", error);
-
-    return {
-      company,
-      summary: response.content,
-      industry: "Unknown",
-      strengths: []
-    };
-  }
+  return {
+    company,
+    sources,
+    webContext,
+    ...parsedData,
+  };
 }
 
 module.exports = researchAgent;

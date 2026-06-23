@@ -7,7 +7,9 @@ router.post("/analyze", async (req, res) => {
   try {
     const { company } = req.body;
 
-    if (!company) {
+    const trimmedCompany = typeof company === "string" ? company.trim() : "";
+
+    if (!trimmedCompany) {
       return res.status(400).json({
         success: false,
         message: "Company name is required",
@@ -15,7 +17,7 @@ router.post("/analyze", async (req, res) => {
     }
 
     const result = await investmentGraph.invoke({
-      company,
+      company: trimmedCompany,
     });
 
     res.json({
