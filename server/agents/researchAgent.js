@@ -2,6 +2,9 @@ const model = require("../services/llmService");
 const tavilyTool = require("../services/tavilyService");
 const parseJsonFromModel = require("../utils/json");
 
+const TAVILY_MAX_RESULTS = Number(process.env.TAVILY_MAX_RESULTS) || 4;
+const TAVILY_SEARCH_DEPTH = process.env.TAVILY_SEARCH_DEPTH || "basic";
+
 async function getWebContext(company) {
   if (!tavilyTool) {
     return {
@@ -14,8 +17,8 @@ async function getWebContext(company) {
     const searchResult = await tavilyTool.search(
       `${company} company latest financial performance business risks investment analysis`,
       {
-        maxResults: 5,
-        searchDepth: "advanced",
+        maxResults: TAVILY_MAX_RESULTS,
+        searchDepth: TAVILY_SEARCH_DEPTH,
       }
     );
 

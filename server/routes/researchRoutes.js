@@ -2,6 +2,34 @@ const express = require("express");
 const investmentGraph = require("../graph/investmentGraph");
 
 const router = express.Router();
+const analysisCache = new Map();
+const CACHE_TTL_MS = Number(process.env.ANALYSIS_CACHE_TTL_MS) || 15 * 60 * 1000;
+
+function getCacheKey(company) {
+  return company.toLowerCase();
+}
+
+function getCachedAnalysis(company) {
+  const cached = analysisCache.get(getCacheKey(company));
+
+  if (!cached) {
+    return null;
+  }
+
+  if (Date.now() - cached.createdAt > CACHE_TTL_MS) {
+    analysisCache.delete(getCacheKey(company));
+    return null;
+  }
+
+  return cached.data;
+}
+
+function setCachedAnalysis(company, data) {
+  analysisCache.set(getCacheKey(company), {
+    createdAt: Date.now(),
+    data,
+  });
+}
 
 router.post("/analyze", async (req, res) => {
   try {
@@ -16,12 +44,25 @@ router.post("/analyze", async (req, res) => {
       });
     }
 
+    const cachedResult = getCachedAnalysis(trimmedCompany);
+
+    if (cachedResult) {
+      return res.json({
+        success: true,
+        cached: true,
+        data: cachedResult,
+      });
+    }
+
     const result = await investmentGraph.invoke({
       company: trimmedCompany,
     });
 
+    setCachedAnalysis(trimmedCompany, result);
+
     res.json({
       success: true,
+      cached: false,
       data: result,
     });
 

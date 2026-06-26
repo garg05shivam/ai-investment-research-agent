@@ -14,20 +14,15 @@ async function researchNode(state) {
   };
 }
 
-async function financeNode(state) {
-  const finance = await financeAgent(state);
+async function analysisNode(state) {
+  const [finance, risk] = await Promise.all([
+    financeAgent(state),
+    riskAgent(state),
+  ]);
 
   return {
     ...state,
     ...finance,
-  };
-}
-
-async function riskNode(state) {
-  const risk = await riskAgent(state);
-
-  return {
-    ...state,
     ...risk,
   };
 }
@@ -72,14 +67,12 @@ const graph = new StateGraph({
 });
 
 graph.addNode("research", researchNode);
-graph.addNode("finance", financeNode);
-graph.addNode("risk", riskNode);
+graph.addNode("analysis", analysisNode);
 graph.addNode("decision", decisionNode);
 
 graph.addEdge(START, "research");
-graph.addEdge("research", "finance");
-graph.addEdge("finance", "risk");
-graph.addEdge("risk", "decision");
+graph.addEdge("research", "analysis");
+graph.addEdge("analysis", "decision");
 graph.addEdge("decision", END);
 
 const investmentGraph = graph.compile();
