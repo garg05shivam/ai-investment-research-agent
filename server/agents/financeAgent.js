@@ -36,10 +36,10 @@ Return only JSON.
 `);
 
   const parsedData = parseJsonFromModel(response.content, {
-    financialScore: 8,
-    revenueGrowth: "Strong",
-    profitability: "Moderate",
-    debtLevel: "Low",
+    financialScore: 0,
+    revenueGrowth: "Not verified",
+    profitability: "Not verified",
+    debtLevel: "Not verified",
     cashFlowQuality: "Unknown",
     valuationView: "Not assessed",
     financialNotes: "Fallback estimate used because the model did not return valid JSON.",
@@ -47,7 +47,10 @@ Return only JSON.
 
   return {
     ...parsedData,
-    financialScore: Number(parsedData.financialScore) || 0,
+    financialScore: Math.max(
+      0,
+      Math.min(10, Number(parsedData.financialScore) || 0)
+    ),
   };
 }
 

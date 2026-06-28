@@ -2,7 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import heroImage from "./assets/hero.png";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = (
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? "" : "http://localhost:5000")
+).replace(/\/+$/, "");
 
 const quickCompanies = [
   "Reliance Industries",
@@ -182,16 +185,24 @@ function App() {
       setCopyStatus("");
       setProgressIndex(0);
 
-      const response = await axios.post(`${API_URL}/api/analyze`, {
-        company: company.trim(),
-      });
+      const response = await axios.post(
+        `${API_URL}/api/analyze`,
+        {
+          company: company.trim(),
+        },
+        {
+          timeout: 120000,
+        }
+      );
 
       setResult(response.data.data);
     } catch (requestError) {
       console.error(requestError);
       setError(
-        requestError.response?.data?.message ||
-          "Analysis failed. Check the server and API keys, then try again."
+        requestError.code === "ECONNABORTED"
+          ? "Analysis took too long. Please try again."
+          : requestError.response?.data?.message ||
+              "Analysis failed. Check the server configuration, then try again."
       );
     } finally {
       setLoading(false);

@@ -1,0 +1,16 @@
+{
+  "name": "alphalens",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "setup": "npm ci --prefix server && npm ci --prefix client",
+    "build": "npm run build --prefix client",
+    "lint": "npm run lint --prefix client",
+    "test": "npm test --prefix server",
+    "check": "npm run lint && npm test && npm run build",
+    "start": "npm start --prefix server"
+  }
+}

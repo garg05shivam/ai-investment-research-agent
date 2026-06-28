@@ -49,6 +49,19 @@ Install these before running the project:
 - Gemini API key
 - Tavily API key, optional
 
+### Quick production-style setup
+
+From the project root, install both packages and build the frontend:
+
+```bash
+npm run setup
+npm run check
+npm start
+```
+
+Open `http://localhost:5000`. The Express server serves both the API and the
+built React app, matching the recommended single-service deployment.
+
 ### Backend setup
 
 From the project root:
@@ -109,7 +122,44 @@ Optional frontend environment file:
 VITE_API_URL=http://localhost:5000
 ```
 
-If `VITE_API_URL` is not provided, the frontend uses `http://localhost:5000`.
+In development, the frontend uses `http://localhost:5000` when
+`VITE_API_URL` is not provided. In a production build it uses the same origin,
+so no frontend API variable is required when the client and server are
+deployed together.
+
+## Deploy
+
+The simplest deployment is one Node web service from the repository root.
+
+Use these service settings:
+
+```text
+Build command: npm run setup && npm run build
+Start command: npm start
+Health check: /health
+Node version: 20 or newer
+```
+
+Set these environment variables in the hosting dashboard:
+
+```env
+NODE_ENV=production
+GEMINI_API_KEY=your_real_key
+GEMINI_MODEL=gemini-2.5-flash
+TAVILY_API_KEY=your_real_key_optional
+```
+
+The hosting provider should supply `PORT`; do not hard-code it. For a
+single-service deployment, `CLIENT_URL` and `VITE_API_URL` can be omitted.
+
+For separate frontend and backend deployments:
+
+- Set `VITE_API_URL` at frontend build time to the public backend URL.
+- Set backend `CLIENT_URL` to the public frontend origin. Multiple origins can
+  be supplied as a comma-separated list.
+- Point the backend health check to `/health`.
+
+Never upload `server/.env` or expose either API key through a `VITE_` variable.
 
 ## How it works - approach and architecture
 

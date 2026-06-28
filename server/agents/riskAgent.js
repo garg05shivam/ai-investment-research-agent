@@ -46,7 +46,7 @@ Return only JSON.
 
   return {
     ...parsedData,
-    riskScore: Number(parsedData.riskScore) || 0,
+    riskScore: Math.max(0, Math.min(10, Number(parsedData.riskScore) || 0)),
   };
 }
 
