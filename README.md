@@ -4,6 +4,10 @@ AlphaLens is an AI Investment Research Agent built for the InsideIIM x Altuni AI
 
 The goal of this project is not just to show a chatbot response. The goal is to show an end-to-end agent workflow where different agents handle different parts of an investment memo and combine their outputs into one final recommendation.
 
+## Live demo
+
+[Open AlphaLens](https://ai-investment-research-agent-1.onrender.com)
+
 ## Tech stack
 
 - Frontend: React, Vite, Tailwind CSS
