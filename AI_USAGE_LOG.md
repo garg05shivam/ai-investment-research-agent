@@ -6,7 +6,7 @@ This file documents how AI was used while building AlphaLens. The assignment all
 
 Project name: AlphaLens  
 Assignment: InsideIIM x Altuni AI Labs AI Investment Research Agent  
-Main stack: React, Node.js, Express, LangGraph.js, LangChain.js, Gemini
+Main stack: React, Node.js, Express, LangGraph.js, LangChain.js, Groq
 
 ## Why I used AI
 
@@ -76,7 +76,7 @@ What happened after this prompt:
 - Updated `decisionAgent.js` so the final recommendation is generated using the previous agent outputs.
 - Updated `investmentGraph.js` to pass richer state between agents.
 - Updated `researchRoutes.js` to trim and validate the company input.
-- Updated `llmService.js` to load environment variables safely and support `GEMINI_API_KEY`.
+- Updated `llmService.js` to load environment variables safely and support `GROQ_API_KEY`.
 - Updated `tavilyService.js` to use the installed `@tavily/core` package.
 - Added `utils/json.js` to handle LLM JSON parsing safely.
 
@@ -97,7 +97,7 @@ What happened after this prompt:
 
 - Multi-agent flow: I used separate agents because investment research has clear stages: research, finance, risk, and decision.
 - LangGraph: I used it because it makes the agent sequence explicit and matches the assignment stack.
-- Optional Tavily: I wanted the project to work even if the reviewer only adds a Gemini key.
+- Optional Tavily: I wanted the project to work even if the reviewer only adds a Groq key.
 - Conservative recommendation: the final agent is instructed to be careful when risk is high or evidence is weak.
 - JSON output: the agents return JSON so the frontend can display results consistently.
 - No trading execution: the project is a research prototype, not a stock trading app.
@@ -144,14 +144,14 @@ node -e "require('./app'); console.log('server app ok')"
 
 These checks passed.
 
-## What I personally need to verify before final submission
+## Final verification completed
 
-- Run the full app with my actual `GEMINI_API_KEY`.
-- Try at least three companies.
-- Take screenshots or copy outputs for example runs if required.
-- Confirm no real `.env` file is included in the zip.
-- Confirm `node_modules` is not included in the zip.
-- Be ready to explain each agent and why it exists.
+- Ran the full application with the configured Groq provider.
+- Verified example analyses for Reliance Industries, TCS, HDFC Bank, and Infosys.
+- Added screenshots and result summaries to the README.
+- Confirmed that the real `.env` file and `node_modules` must not be included in
+  the submission ZIP.
+- Reviewed each agent's role and the reason for the multi-agent design.
 
 ## My explanation of the final project
 

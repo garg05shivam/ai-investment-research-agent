@@ -4,16 +4,22 @@ AlphaLens is an AI Investment Research Agent built for the InsideIIM x Altuni AI
 
 The goal of this project is not just to show a chatbot response. The goal is to show an end-to-end agent workflow where different agents handle different parts of an investment memo and combine their outputs into one final recommendation.
 
-## Live demo
+## Project links
 
 [Open AlphaLens](https://ai-investment-research-agent-1.onrender.com)
+
+- [Source code](https://github.com/garg05shivam/ai-investment-research-agent)
+- [Download submission ZIP](https://github.com/garg05shivam/ai-investment-research-agent/archive/refs/heads/main.zip)
+
+The hosted service may take a short time to wake up after a period of
+inactivity.
 
 ## Tech stack
 
 - Frontend: React, Vite, Tailwind CSS
 - Backend: Node.js, Express.js
 - AI orchestration: LangGraph.js
-- LLM provider: Gemini through LangChain.js
+- LLM provider: Llama 3.3 through Groq and LangChain.js
 - Optional web research: Tavily
 - API style: REST API between frontend and backend
 
@@ -48,9 +54,9 @@ The output includes:
 
 Install these before running the project:
 
-- Node.js
+- Node.js 20 or newer
 - npm
-- Gemini API key
+- Groq API key
 - Tavily API key, optional
 
 ### Quick production-style setup
@@ -78,8 +84,10 @@ npm install
 Create a `server/.env` file:
 
 ```env
-GEMINI_API_KEY=your_gemini_api_key
-GEMINI_MODEL=gemini-2.5-flash
+GROQ_API_KEY=your_groq_api_key
+GROQ_MODEL=llama-3.3-70b-versatile
+GROQ_MAX_RETRIES=1
+LLM_TIMEOUT_MS=45000
 TAVILY_API_KEY=your_tavily_api_key_optional
 PORT=5000
 ```
@@ -148,8 +156,10 @@ Set these environment variables in the hosting dashboard:
 
 ```env
 NODE_ENV=production
-GEMINI_API_KEY=your_real_key
-GEMINI_MODEL=gemini-2.5-flash
+GROQ_API_KEY=your_real_key
+GROQ_MODEL=llama-3.3-70b-versatile
+GROQ_MAX_RETRIES=1
+LLM_TIMEOUT_MS=45000
 TAVILY_API_KEY=your_real_key_optional
 ```
 
@@ -223,7 +233,7 @@ Response shape:
 
 File: `server/agents/researchAgent.js`
 
-This agent builds the company context. If Tavily is configured, it searches for recent company information and passes that context to Gemini. It returns summary, industry, business model, strengths, watch items, and source links.
+This agent builds the company context. If Tavily is configured, it searches for recent company information and passes that context to the Llama model through Groq. It returns summary, industry, business model, strengths, watch items, and source links.
 
 ### 2. Finance Agent
 
@@ -275,7 +285,7 @@ investment-agent/
 
 - I used a multi-agent structure instead of one big prompt because it is easier to explain, debug, and extend.
 - I used LangGraph because the assignment asked for LangChain.js or LangGraph.js and this workflow fits naturally as a graph.
-- I kept Tavily optional so the project can still run with only a Gemini key.
+- I kept Tavily optional so the project can still run with only a Groq key.
 - I added JSON parsing protection because LLMs can sometimes return markdown or extra text even when asked for JSON.
 - I kept the UI focused on the research output instead of making a marketing landing page.
 - I made the final decision conservative because an investment research tool should not casually recommend investing when evidence is weak.
@@ -283,60 +293,72 @@ investment-agent/
 
 ## Example runs
 
-These are the kinds of outputs the app is designed to generate. The exact wording can change because the LLM response depends on the model and available search context.
+The final recommendation can change between runs because the result depends on
+the model response and the research context available at that time. The
+screenshots below are therefore examples, not fixed financial recommendations.
 
 ### Example 1: Reliance Industries
 
-Expected output areas:
+- Recommendation: `PASS`
+- Confidence: 60%
+- Financial quality: 6/10
+- Risk level: 6/10
+- Summary: The agent recognized strong revenue and profitability but took a
+  cautious view because of interest-rate, credit, borrowing, and debt-related
+  risks.
 
-- Business summary of Reliance Industries
-- Industry: energy, telecom, retail, digital services
-- Strengths: scale, diversified business, cash generation, Jio and retail ecosystem
-- Risks: energy cycle exposure, high capex, regulation, execution risk
-- Final decision: `INVEST` or `PASS` based on whether the financial score outweighs risk
+![Reliance Industries analysis showing a PASS recommendation](docs/screenshots/reliance-industries.png)
 
-### Example 2: Tesla
+### Example 2: TCS
 
-Expected output areas:
+- Recommendation: `INVEST`
+- Confidence: 80%
+- Financial quality: 8/10
+- Risk level: 6/10
+- Summary: Strong cash generation, consistent profitability, and a diversified
+  client base outweighed growth volatility and geopolitical risks.
 
-- Business summary of Tesla
-- Industry: electric vehicles, energy storage, software/AI
-- Strengths: brand, EV leadership, manufacturing scale, technology optionality
-- Risks: valuation, competition, margin pressure, execution volatility
-- Final decision: often more cautious if valuation and risk are high
+![TCS analysis showing an INVEST recommendation](docs/screenshots/tcs.png)
 
 ### Example 3: HDFC Bank
 
-Expected output areas:
+- Recommendation: `INVEST`
+- Confidence: 80%
+- Financial quality: 8/10
+- Risk level: 6/10
+- Summary: Loan growth, fee income, lower provisions, and risk-management
+  strength outweighed the identified watch items.
 
-- Business summary of HDFC Bank
-- Industry: banking and financial services
-- Strengths: deposit franchise, asset quality, lending scale
-- Risks: margin pressure, regulation, merger integration, credit cycle
-- Final decision: depends on whether financial quality offsets near-term risks
+![HDFC Bank analysis showing an INVEST recommendation](docs/screenshots/hdfc-bank.png)
+
+### Example 4: Infosys
+
+- Recommendation: `INVEST`
+- Confidence: 70%
+- Financial quality: 7/10
+- Risk level: 6/10
+- Summary: The agent found a favorable risk-adjusted profile supported by
+  stable profitability, low debt, and good cash-flow quality.
+
+![Infosys analysis showing an INVEST recommendation](docs/screenshots/infosys.png)
 
 ## Validation done
 
-The following checks were run successfully:
+From the project root, the complete validation suite was run successfully:
 
 ```bash
-cd client
-npm.cmd run lint
-npm.cmd run build
+npm run check
 ```
 
-Backend import check:
+This command performs:
 
-```bash
-cd server
-node -e "require('./app'); console.log('server app ok')"
-```
+- Frontend ESLint checks
+- Backend automated tests
+- Frontend production build
 
-Result:
-
-```text
-server app ok
-```
+The backend test suite currently covers the health endpoint, empty company
+validation, unknown API routes, and serving the production frontend. All four
+tests pass.
 
 ## Known limitations
 
@@ -344,7 +366,7 @@ server app ok
 - Without Tavily, the research uses model knowledge instead of live web context.
 - It does not use a dedicated financial market data API yet.
 - It does not provide source-level citations for every claim.
-- It is not deployed online in the current version.
+- Availability of the public demo depends on the external hosting service.
 - It is not financial advice.
 
 ## What I would improve with more time
@@ -355,7 +377,7 @@ server app ok
 - Add downloadable PDF reports.
 - Add saved analysis history.
 - Add tests for backend routes, JSON parsing, and decision fallback behavior.
-- Deploy the frontend and backend online.
+- Add stronger deployment monitoring and provider-failure fallbacks.
 - Add clearer citations next to each generated claim.
 
 ## AI usage
@@ -369,6 +391,7 @@ When submitting the zip, include:
 - Source code
 - `README.md`
 - `AI_USAGE_LOG.md`
+- Example-run screenshots
 - `server/.env.example`
 - `client/.env.example`
 

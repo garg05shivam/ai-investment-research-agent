@@ -4,6 +4,8 @@ const parseJsonFromModel = require("../utils/json");
 
 const TAVILY_MAX_RESULTS = Number(process.env.TAVILY_MAX_RESULTS) || 4;
 const TAVILY_SEARCH_DEPTH = process.env.TAVILY_SEARCH_DEPTH || "basic";
+const TAVILY_TIMEOUT_SECONDS =
+  Number(process.env.TAVILY_TIMEOUT_SECONDS) || 15;
 
 async function getWebContext(company) {
   if (!tavilyTool) {
@@ -19,6 +21,7 @@ async function getWebContext(company) {
       {
         maxResults: TAVILY_MAX_RESULTS,
         searchDepth: TAVILY_SEARCH_DEPTH,
+        timeout: TAVILY_TIMEOUT_SECONDS,
       }
     );
 

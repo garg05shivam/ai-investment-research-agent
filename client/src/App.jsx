@@ -6,6 +6,8 @@ const API_URL = (
   import.meta.env.VITE_API_URL ||
   (import.meta.env.PROD ? "" : "http://localhost:5000")
 ).replace(/\/+$/, "");
+const ANALYSIS_TIMEOUT_MS =
+  Number(import.meta.env.VITE_ANALYSIS_TIMEOUT_MS) || 180000;
 
 const quickCompanies = [
   "Reliance Industries",
@@ -191,7 +193,7 @@ function App() {
           company: company.trim(),
         },
         {
-          timeout: 120000,
+          timeout: ANALYSIS_TIMEOUT_MS,
         }
       );
 
@@ -200,7 +202,7 @@ function App() {
       console.error(requestError);
       setError(
         requestError.code === "ECONNABORTED"
-          ? "Analysis took too long. Please try again."
+          ? "Analysis exceeded three minutes. Check the backend logs and try again."
           : requestError.response?.data?.message ||
               "Analysis failed. Check the server configuration, then try again."
       );

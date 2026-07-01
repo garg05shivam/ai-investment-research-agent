@@ -82,11 +82,15 @@ router.post("/analyze", async (req, res) => {
 
   } catch (error) {
     console.error("Analysis Error:", error);
+    const isTimeout =
+      error?.name === "TimeoutError" ||
+      /timed?\s*out|timeout|aborted/i.test(error?.message || "");
 
-    return res.status(500).json({
+    return res.status(isTimeout ? 504 : 500).json({
       success: false,
-      message:
-        process.env.NODE_ENV === "production"
+      message: isTimeout
+        ? "The AI provider took too long to respond. Please try again."
+        : process.env.NODE_ENV === "production"
           ? "Analysis failed. Please try again."
           : error.message,
     });
